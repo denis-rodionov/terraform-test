@@ -20,8 +20,9 @@ def run_shell_command_with_parameters(command, work_dir=None):
     return_code = res.returncode
 
     if return_code != 0:
-        error_message = f"SHELL: non-zero error code" \
-                        f" (return_code={return_code}, output={stdout}, err={stderr}) "
+        error_message = "SHELL: non-zero error code" \
+                        " (return_code=%s, output=%s, err=%s, command=%s) " \
+                        % (return_code, stdout, stderr, command)
         
         return error_message, f"{stdout}\n{stderr}"
     return None, stdout
@@ -31,12 +32,11 @@ def run_shell_command_with_parameters(command, work_dir=None):
 def fetch(query):
     # Terraform requires the values you return be strings,
     # so terraform_external_data will error if they aren't.
-    #print(query)
-    #return ""
     names = query["list_of_vms"].split(",")
     ips = query["list_of_ips"].split(",")
+    passwords = query["list_of_passwords"].split(",")
 
-    if len(names) != len(ips):
+    if len(names) != len(ips) and len(names) != len(passwords):
         raise Exception("The length of machine names and ips is not the same")
 
     vms = {}
@@ -46,14 +46,15 @@ def fetch(query):
         vms[names[index]] = {
             "ip": ips[index],
             "vm_name_to_ping": names[vm_to_ping_index],
-            "vm_ip_to_ping": ips[vm_to_ping_index]
+            "vm_ip_to_ping": ips[vm_to_ping_index],
+            "password": passwords[index]
         }
 
     res = {}
     for name, value in vms.items():
-        err, _ = run_shell_command_with_parameters("sshpass -p '%s' ssh %s@%s ping -c 1 %s" %
-            ('Pa$$w0rd', query['ssh_username'], value["ip"], value["vm_ip_to_ping"]))
-        res["%s ping %s" % (name, value["vm_name_to_ping"])] = "pass" if not err else "fail"
+        err, _ = run_shell_command_with_parameters("sshpass -p %s ssh %s@%s ping -c 1 %s" %
+            (value['password'], query['ssh_username'], value["ip"], value["vm_ip_to_ping"]))
+        res["%s ping %s (%s)" % (name, value["vm_name_to_ping"], err)] = "pass" if not err else "fail"
 
     return res
 

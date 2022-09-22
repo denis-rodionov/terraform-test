@@ -80,8 +80,7 @@ resource "azurerm_network_interface_security_group_association" "acc_vm1_nic" {
 resource "random_password" "password" {
   count = var.vm_count
   length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+  override_special = "_"
 }
 
 # Create virtual machines
@@ -97,11 +96,6 @@ resource "azurerm_linux_virtual_machine" "vm" {
   admin_username                  = "vm_admin"
   admin_password                  = random_password.password[count.index].result
   disable_password_authentication = false
-
-  admin_ssh_key {
-    username   = "vm_admin"
-    public_key = file("~/.ssh/id_rsa.pub")
-  }
 
   os_disk {
     name                 = "vm-disk-${count.index}"
@@ -123,6 +117,7 @@ data "external" "ping_result" {
     list_of_vms = "${join(",", azurerm_linux_virtual_machine.vm.*.name)}"
     list_of_ips = "${join(",", azurerm_linux_virtual_machine.vm.*.public_ip_address)}"
     ssh_username = "vm_admin"
+    list_of_passwords = "${join(",", random_password.password.*.result)}"
   }
   depends_on = [azurerm_linux_virtual_machine.vm]
 }
@@ -130,34 +125,3 @@ data "external" "ping_result" {
 locals {
   ping_result = data.external.ping_result.result  
 }
-
-/* resource "null_resource" "script" {
-  #custom_data = filebase64("startup.sh")
-
-  triggers = {
-    always_run = timestamp()
-  }
-
-
-  provisioner "local-exec" {
-    command     = <<-EOT
-      ssh
-      echo $A
-    EOT
-    interpreter = ["/bin/bash", "-c"]
-  }
-
-  connection {
-    type     = "ssh"
-    user     = "vm_admin"
-    password = "Pa$$w0rd"
-    host     = azurerm_linux_virtual_machine.vm[0].public_ip_address
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "ls /",
-      "echo Hi!",
-    ]
-  }
-} */
