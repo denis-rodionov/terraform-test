@@ -54,7 +54,7 @@ def fetch(query):
     for name, value in vms.items():
         err, _ = run_shell_command_with_parameters("sshpass -p %s ssh %s@%s ping -c 1 %s" %
             (value['password'], query['ssh_username'], value["ip"], value["vm_ip_to_ping"]))
-        res["%s ping %s (%s)" % (name, value["vm_name_to_ping"], err)] = "pass" if not err else "fail"
+        res["%s ping %s" % (name, value["vm_name_to_ping"])] = "pass" if not err else "fail"
 
     return res
 
