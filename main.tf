@@ -63,7 +63,7 @@ resource "azurerm_network_security_group" "test_nsg" {
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Icmp"
-    destination_port_range = "*"
+    destination_port_range     = "*"
     source_port_range          = "*"
     source_address_prefix      = "*"
     destination_address_prefix = "*"
@@ -78,7 +78,7 @@ resource "azurerm_network_interface_security_group_association" "acc_vm1_nic" {
 }
 
 resource "random_password" "password" {
-  count = var.vm_count
+  count            = var.vm_count
   length           = 16
   override_special = "_"
 }
@@ -114,14 +114,14 @@ resource "azurerm_linux_virtual_machine" "vm" {
 data "external" "ping_result" {
   program = ["python3", "${path.module}/ping_result.py"]
   query = {
-    list_of_vms = "${join(",", azurerm_linux_virtual_machine.vm.*.name)}"
-    list_of_ips = "${join(",", azurerm_linux_virtual_machine.vm.*.public_ip_address)}"
-    ssh_username = "vm_admin"
+    list_of_vms       = "${join(",", azurerm_linux_virtual_machine.vm.*.name)}"
+    list_of_ips       = "${join(",", azurerm_linux_virtual_machine.vm.*.public_ip_address)}"
+    ssh_username      = "vm_admin"
     list_of_passwords = "${join(",", random_password.password.*.result)}"
   }
   depends_on = [azurerm_linux_virtual_machine.vm]
 }
 
 locals {
-  ping_result = data.external.ping_result.result  
+  ping_result = data.external.ping_result.result
 }
