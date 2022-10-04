@@ -1,4 +1,13 @@
-vm_count = 3
+vm_count                = 3
 resource_group_location = "eastus"
-vm_size = "Standard_D1_v2"
-vm_ubuntu_image_sku="18.04-LTS"
+
+vm_parameters = {
+  "0" = {
+    ubuntu_image = "18.04-LTS"
+    size         = "Standard_D11_v2"
+  },
+  "1" = {
+    ubuntu_image = "18.04-LTS"
+    size         = "Standard_D1_v2"
+  }
+}

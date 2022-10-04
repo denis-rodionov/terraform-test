@@ -8,12 +8,12 @@ variable "resource_group_location" {
   description = "Location of the resource group."
 }
 
-variable "vm_size" {
-  default = "Standard_D1_v2"
-  description = "VM size in Azure"
-}
-
-variable "vm_ubuntu_image_sku" {
-  default = "18.04-LTS"
-  description = "SKU for Ubuntu image"
+variable "vm_parameters" {
+  type = map(object({
+    ubuntu_image = string
+    size         = string
+  }))
+  description = "Parameters for each VM, where the key is VM index in the VM array and value is the vm parameters."
+  default = {
+  }
 }

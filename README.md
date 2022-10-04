@@ -40,6 +40,8 @@ With specific parameters:
 
 `terraform apply -var="vm_count=3"`
 
+`terraform apply -var='vm_parameters={"0":{"size":"Standard_D11_v2","ubuntu_image":"18.04-LTS"}}'`
+
 With *.tfvars* file:
 
 `terraform apply -var-file="testing.tfvars"`

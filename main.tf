@@ -90,8 +90,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
   location              = azurerm_resource_group.rg.location
   resource_group_name   = azurerm_resource_group.rg.name
   network_interface_ids = [azurerm_network_interface.vm_nic[count.index].id]
-
-  size = var.vm_size
+  size                  = try("${var.vm_parameters["${count.index}"].size}", "Standard_D1_v2")
 
   admin_username                  = "vm_admin"
   admin_password                  = random_password.password[count.index].result
@@ -106,7 +105,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
   source_image_reference {
     publisher = "Canonical"
     offer     = "UbuntuServer"
-    sku       = var.vm_ubuntu_image_sku
+    sku       = try("${var.vm_parameters["${count.index}"].ubuntu_image}", "18.04-LTS")
     version   = "latest"
   }
 }
